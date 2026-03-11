@@ -13,10 +13,14 @@ app.get('/api/satellites/status', async (req, res) => {
     res.json(data);
 });
 
-// get latest eclipse alert
+// Get latest eclipse alert
 app.get('/api/alerts/eclipse', async (req, res) => {
     const {data, error} = await supabase.from('telemetry_logs').select('*').eq('is_eclipse', true).order('log_timestamp', { ascending:true}).limit(10);
 
     if(error) return res.status(500).json({error : error.message});
     res.json(data);
+});
+
+app.listen(PORT, () => {
+    console.log(`http://localhost:${PORT}`);
 });
