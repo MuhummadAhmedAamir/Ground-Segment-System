@@ -4,16 +4,20 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "universe": "node universe.js",
+    "server": "node server.js",
+    "start": "concurrently \"npm run universe\" \"npm run server\""
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "@supabase/supabase-js": "^2.99.0",
     "dotenv": "^17.3.1",
-    "express": "^5.2.1",
-    "mysql2": "^3.18.2",
-    "sequelize": "^6.37.7"
+    "express": "^5.2.1"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
   }
 }
