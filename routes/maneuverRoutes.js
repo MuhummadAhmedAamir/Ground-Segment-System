@@ -5,5 +5,6 @@ const { authenticate } = require('../middleware/auth')
 const { requireRole } = require('../middleware/rbac')
 const { runManeuver } = require('../controllers/maneuverController')
 
+// dynamaci route parameter
 router.post('/:plan_id/execute', authenticate, requireRole('MISSION_ENGINEER'), runManeuver)
 module.exports = router;

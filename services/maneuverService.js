@@ -31,23 +31,21 @@ async function executeManeuver(planId, engineerId) {
     }
 
     const state = stateResult.rows[0];
-    const requiredFuel = Number(plan.thrust_val);
+    const requiredFuel = plan.thrust_val;
 
     if (state.fuel_level < requiredFuel) {
       throw new Error('Insufficient fuel');
     }
 
-    await client.query(
-      `UPDATE satellite_state 
-      SET theta_deg = $1, altitude_km = $2, fuel_level = fuel_level - $3, last_updated = NOW() 
-      WHERE sat_id = $4`,
-      [
-        plan.target_orbit,     
-        plan.target_orbit,      
-        requiredFuel,
-        plan.sat_id
-      ]
-    );
+  await client.query(
+    `UPDATE satellite_state
+     SET orbit_id = orbit_id + 1, fuel_level = fuel_level - $1, last_updated = NOW()
+     WHERE sat_id = $2`,
+    [
+      requiredFuel,
+      plan.sat_id
+    ]
+  );
 
     await client.query(
       `UPDATE maneuver_plans
