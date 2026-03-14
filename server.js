@@ -10,9 +10,9 @@ app.use(express.json());
 
 console.log(process.env.DATABASE_URL)
 
-app.use('/api/v1/maneuver', maneuverRoutes);
-app.use('/api/v1/satellite', satelliteRoutes);
-app.use('/api/v1/auth', authRoutes);
+app.use('/maneuver', maneuverRoutes);
+app.use('/satellite', satelliteRoutes);
+app.use('/auth', authRoutes);
 
 app.get('/', (req, res) => {
   res.send('Backend running');
