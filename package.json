@@ -6,7 +6,7 @@
   "scripts": {
     "universe": "node universe.js",
     "server": "node server.js",
-    "start": "concurrently \"npm run universe\" \"npm run server\""
+    "start": "nodemon backend/server.js backend/universe.js"
   },
   "keywords": [],
   "author": "",
@@ -18,7 +18,10 @@
     "dotenv": "^17.3.1",
     "express": "^5.2.1",
     "jsonwebtoken": "^9.0.3",
-    "pg": "^8.20.0"
+    "nodemon": "^3.1.14",
+    "pg": "^8.20.0",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1"
   },
   "devDependencies": {
     "concurrently": "^9.2.1"

@@ -1,26 +1,29 @@
+require('dotenv').config();
 const express = require('express');
-const supabase = require('./supabaseClient');
+
+const authRoutes = require('./routes/authRoutes');
+const missionRoutes = require('./routes/missionRoutes');
+const satelliteRoutes = require('./routes/satelliteRoutes');
+const maneuverRoutes = require('./routes/maneuverRoutes');
+const planRoute = require('./routes/planRoute'); 
+
 const app = express();
-const PORT = 3000;
 
 app.use(express.json());
 
-// Get all active satellites for the dashboard
-app.get('/api/satellites/status', async (req, res) => {
-    const {data, error} = await supabase.from('satellite_state').select('sat_id, theta_deg, altitude_km, last_updated, satellites(status, model_name)').eq('satellites.status', 'ACTIVE');
+console.log(process.env.DATABASE_URL);
 
-    if(error) return res.status(500).json({error: error.message});
-    res.json(data);
+app.use('/auth', authRoutes);
+app.use('/missions', missionRoutes);
+app.use('/satellite', satelliteRoutes);
+app.use('/maneuver', maneuverRoutes);
+app.use('/plan', planRoute); 
+
+app.get('/', (req, res) => {
+  res.send('Backend running');
 });
 
-// Get latest eclipse alert
-app.get('/api/alerts/eclipse', async (req, res) => {
-    const {data, error} = await supabase.from('telemetry_logs').select('*').eq('is_eclipse', true).order('log_timestamp', { ascending:true}).limit(10);
-
-    if(error) return res.status(500).json({error : error.message});
-    res.json(data);
-});
-
+const PORT = 3000;
 app.listen(PORT, () => {
-    console.log(`http://localhost:${PORT}`);
+  console.log(`Server running: http://localhost:${PORT}`);
 });

@@ -1,0 +1,47 @@
+So overall flow of what I have implemented looks like this: 
+
+"universe.js" is basically the VERY BASIC & POOR simulation engine. It changes satellite states every 5 seconds. What it does is pretty self explanatory, it keeps the simulation alive and updates things in the background. If we ever want any process to always remain running inside the simulation we add it here. It is completely independent from the backend request flow. 
+
+"server.js" is where the backend is initialized and routes are mounted. This is basically the entry point of the whole project.
+
+The "routes/" directory contains the API endpoints. Right now there are three routes. Each route file only defines endpoints and calls their respective controllers from the "controllers/" directory. So for example, in "authRoutes.js", the login endpoint calls a function from "authController.js". That is because in this backend architecture all the business logic lives inside controllers/, and the routes/ directory only handles routing (that's what I know). It does not contain any business logic. 
+
+In "authController.js:, you’ll notice the use of "db/pool", bcrypt, and jsonwebtoken.
+
+"db/pool" is for establishing a PostgreSQL connection pool. So instead of creating and closing a database connection every time the pool manags connections automatically.
+
+bcrypt is used for password hashing and verification. When a user registers the password is stored as a hash. During login, bcrypt.compare() checks the entered password against the stored hashed password. 
+
+jsonwebtoken is used for authentication tokens. When login is successful, a token is generated using the user’s id and role, and it is signed using the secret in the .env file. That token is then used to access protected routes (satellite and maneuver ones for now).
+
+For the maneuver and satellite routes, there is an additional layer called "middleware/". my understanding of middleware is that whatever runs between the received request and the sent response falls under middleware (I think that explanation wasn’t even needed, but I am yapping anyways). I have used middleware for authentication and role checking.
+
+The authenticate 'auth.js" middleware extracts the JWT from the request header, verifies it using the secret key, and if everything is valid it attaches the decoded user data to req.user. If the token is missing or invalid it rejects the request.
+
+The requireRole "rbac.js" middleware checks whether the user has the required role. If not, it returns error. So authentication confirms who the user is and authorization checks what they are allowed to do.
+
+Then in the "services/" directory, there is the transaction logic. It does not involve any complex formulas as it should. It is basically a structured update chain that follows BEGIN, COMMIT, and ROLLBACK as the project document specifies.
+
+For example, in the maneuver execution service, the flow is:
+
+Start transaction
+lock necessary rows using FOR UPDATE
+check plan status
+check satellite state
+check fuel (main bus thrust_val kay sath check kar raha hoon [crying emoji nahi dal skta because txt file main hoon])
+update satellite state
+update maneuver plan
+insert into command history
+commit
+
+If anything fails at any point, the transaction rolls back.
+
+So overall:
+universe.js handles continuous simulation.
+server.js initializes everything.
+routes/ just defines endpoints.
+controllers/ contain business logic.
+middleware/ handles authentication and authorization.
+services/ handle transaction-level database operations.
+
+also aap relevant GET and POST request karkay khud bhi observer kar sktay ho transaction ko, just make sure to check kay kisi mission ka status PENDING ho and satellite kay vitals safe range main lie kar rahay hoon or in other words thrust_val say ziada fuel ho (crying emoji)
