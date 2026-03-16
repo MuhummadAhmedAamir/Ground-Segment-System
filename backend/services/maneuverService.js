@@ -55,12 +55,13 @@ async function executeManeuver(planId, engineerId) {
     else {
       newVelocity = state.velocity_kms - velocityChange;
     }
-
+    
+    let newAltitude = targetOrbit === 2 ? 600: 300;
     await client.query(
       `UPDATE satellite_state
-      SET orbit_id = $1, velocity_kms = $2, fuel_level = fuel_level - $3, last_updated = NOW()
-      WHERE sat_id = $4`,
-      [targetOrbit, newVelocity, fuelUsed, plan.sat_id]
+      SET orbit_id = $1, velocity_kms = $2, fuel_level = fuel_level - $3, altitude_km = $5, last_updated = NOW()
+      WHERE sat_id = $5`,
+      [targetOrbit, newVelocity, fuelUsed, ,plan.sat_id, newAltitude]
     );
 
     await client.query(
