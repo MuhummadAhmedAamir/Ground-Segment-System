@@ -1,7 +1,14 @@
 const pool = require('../db/pool');
 
 
-async function communicationWindowOpen(dish_id, state_id, gs_id){
+async function communicationWindowOpen(req,res){
+    const {dish_id, state_id, gs_id} = req.body;
+    if (!dish_id || !state_id || !gs_id) {
+      return res.status(400).json({
+        error: "Missing required fields"
+      });
+    }
+
     const client = await pool.connect();
     try{
         await client.query('BEGIN');
@@ -66,14 +73,16 @@ async function communicationWindowOpen(dish_id, state_id, gs_id){
         }
 
         await client.query('COMMIT');
-        return {
+        res.json({
             open: true,
             direction: sign
-        }
+        })
     } catch(err){
         await client.query('ROLLBACK');
-        throw err;
+        res.status(500).json({ error: err.message });
     } finally{
         client.release();
     }
 }
+
+module.exports = {communicationWindowOpen};
