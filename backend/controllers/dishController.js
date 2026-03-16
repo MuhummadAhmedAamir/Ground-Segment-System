@@ -45,7 +45,10 @@ async function dishAngle(dish_id, state_id, sign){
         return {
             success: 'True'
         }
-    } catch (err){
-
+    } catch(err){
+        await client.query('ROLLBACK');
+        throw err;
+    } finally{
+        client.release();
     }
 }
