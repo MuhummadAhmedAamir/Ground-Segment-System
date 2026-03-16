@@ -22,7 +22,7 @@ async function communicationWindowOpen(req,res){
         dish = dishResult.rows[0];
 
         const satelliteResult = await client.query('SELECT * FROM satellite_state WHERE state_id = $1 FOR UPDATE'
-            ,[state_id, gs_id, ]
+            ,[state_id]
         );
         if (satelliteResult.rows.length == 0){
             throw new Error("Satellite State not found");
@@ -37,11 +37,11 @@ async function communicationWindowOpen(req,res){
         };
         window = windowResult.rows[0];
 
-        await client.query('INSERT INTO access_time (sat_id, gs_id, start_time, end_time, date, status) VALUES ($1, $2, $3, $4, $5, $6)'
-            ,[state_id, gs_id, 0, 0, 0, 'PENDING']
+        await client.query('INSERT INTO access_time (state_id, gs_id, start_time, end_time, date, status) VALUES ($1, $2, $3, $4, $5, $6)'
+            ,[state_id, gs_id, new Date(0), new Date(0), new Date(0), 'PENDING']
         );
 
-        if (!(window.max_dist < satellite.altitude_km)){
+        if (!(window.max_dist > satellite.altitude_km)){
             throw new Error("Satellite is unreachable");
         };
 
@@ -55,7 +55,8 @@ async function communicationWindowOpen(req,res){
                 throw new Error("Ground Station and Satellite are out of phase");
             }
         }
-
+        console.log(window.theta)
+        console.log(satellite.theta_deg)
         if (!(((Math.abs(window.theta - satellite.theta_deg)) % 90) == 0)){
             throw new Error("Satellite is out of range");
         }
