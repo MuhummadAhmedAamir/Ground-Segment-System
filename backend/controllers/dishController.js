@@ -1,4 +1,4 @@
-const pool = require('..db/pool');
+const pool = require('../db/pool');
 
 async function dishAngle(req, res){
     const {dish_id, state_id, sign} = req.body;
@@ -26,7 +26,7 @@ async function dishAngle(req, res){
         };
         satellite = satelliteResult.rows[0];
 
-        const personnelResult = await client.query('SELECT COUNT(*) FROM personnel WHERE role = Engineer AND is_working = TRUE FOR UPDATE');
+        const personnelResult = await client.query('SELECT COUNT(*) FROM personnel WHERE role = \'Engineer\' AND is_working = TRUE FOR UPDATE');
         if(personnelResult.rows.length == 0){
             throw new Error('No data of Personnel');
         }
@@ -46,7 +46,8 @@ async function dishAngle(req, res){
         await client.query(`UPDATE dish SET elevation_angle = $1 WHERE dish_id = $2`
             ,[dish.elevation_angle, dish_id]
         );
-
+        
+        await client.query('COMMIT');
         res.json({
             success: 'True'
         })
