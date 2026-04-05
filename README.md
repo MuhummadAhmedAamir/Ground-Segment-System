@@ -1,6 +1,4 @@
 # Ground Segment System (Simulation)
-# REMOVE THESE 3 LINES BEFORE FINAL SUBMISSION
-* Attach UI screenshots, edit setup and installation section if there is something missing and go through the Feature Walkthrough section and add the feature you  implemented in your side. Lastly mention if there is some Limitation that is in your mind and it needs to be mentioned. 
 ## Group 3
 
 ### Team Members
