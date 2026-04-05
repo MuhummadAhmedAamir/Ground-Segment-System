@@ -408,3 +408,256 @@ body {
   color: #8b9cb3;
   text-transform: capitalize;
 }
+
+/* Mission engineer dashboard */
+.mce-page {
+  min-height: 100vh;
+  padding: 1rem 1.25rem 2rem;
+  background: radial-gradient(ellipse 120% 80% at 50% -20%, #1e3a5f 0%, transparent 50%), #0f1419;
+}
+
+.mce-banner {
+  margin: 0 0 1rem;
+  max-width: 56rem;
+}
+
+.mce-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.4fr 0.95fr;
+  gap: 1rem;
+  align-items: start;
+}
+
+@media (max-width: 1100px) {
+  .mce-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.mce-panel {
+  min-height: 200px;
+}
+
+.mce-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.mce-panel-head .gc-panel-title {
+  margin-bottom: 0;
+}
+
+.mce-add-btn {
+  padding: 0.35rem 0.65rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 8px;
+  border: 1px solid #3d6fa8;
+  background: #1e3a5f;
+  color: #e7ecf3;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.mce-add-btn:hover {
+  background: #2d6a9f;
+}
+
+.mce-mission-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.mce-mission-card {
+  padding: 0.65rem;
+  margin-bottom: 0.5rem;
+  border-radius: 8px;
+  border: 1px solid #2a3544;
+  background: #0f1419;
+}
+
+.mce-mission-name {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.mce-mission-meta {
+  font-size: 0.72rem;
+  color: #8b9cb3;
+  margin-top: 0.2rem;
+}
+
+.mce-mission-status {
+  font-size: 0.78rem;
+  margin-top: 0.35rem;
+}
+
+.mce-mission-goal {
+  margin: 0.4rem 0 0;
+  font-size: 0.75rem;
+  color: #b8c5d6;
+  line-height: 1.35;
+}
+
+.mce-status-pill {
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 0.15rem 0.45rem;
+  border-radius: 999px;
+  text-transform: uppercase;
+}
+
+.mce-status-pill--active {
+  background: #1a4d2e;
+  color: #7dffb3;
+}
+
+.mce-status-pill--inactive {
+  background: #3a2a2a;
+  color: #e0a0a0;
+}
+
+.mce-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.mce-secondary-btn {
+  padding: 0.55rem 0.85rem;
+  border-radius: 8px;
+  border: 1px solid #2a3544;
+  background: #1a2332;
+  color: #b8c5d6;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.mce-secondary-btn:hover:not(:disabled) {
+  background: #243044;
+}
+
+.mce-secondary-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.mce-debris-block {
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #2a3544;
+}
+
+.mce-subtitle {
+  margin: 0 0 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #b8c5d6;
+}
+
+.mce-table-wrap {
+  overflow-x: auto;
+  max-height: 220px;
+  overflow-y: auto;
+  border: 1px solid #2a3544;
+  border-radius: 8px;
+}
+
+.mce-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.72rem;
+}
+
+.mce-table th,
+.mce-table td {
+  padding: 0.35rem 0.5rem;
+  text-align: left;
+  border-bottom: 1px solid #2a3544;
+}
+
+.mce-table th {
+  background: #152030;
+  color: #8b9cb3;
+  font-weight: 600;
+  position: sticky;
+  top: 0;
+}
+
+.mce-table tbody tr:hover {
+  background: #152030;
+}
+
+.mce-warnings {
+  margin: 0.5rem 0 0;
+  padding-left: 1.1rem;
+  font-size: 0.75rem;
+  color: #f08080;
+}
+
+.mce-plans-hint {
+  margin-top: 0.75rem;
+}
+
+.mce-help {
+  margin: 0;
+  font-size: 0.78rem;
+}
+
+.mce-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.mce-modal {
+  width: 100%;
+  max-width: 22rem;
+  padding: 1.25rem;
+  border-radius: 12px;
+  background: #1a2332;
+  border: 1px solid #2a3544;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.45);
+}
+
+.mce-modal-title {
+  margin: 0 0 1rem;
+  font-size: 1.1rem;
+}
+
+.mce-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.mce-textarea {
+  resize: vertical;
+  min-height: 4rem;
+}
+
+.mce-modal-close {
+  margin-top: 0.75rem;
+  width: 100%;
+  padding: 0.45rem;
+  border-radius: 8px;
+  border: 1px solid #2a3544;
+  background: #0f1419;
+  color: #8b9cb3;
+  cursor: pointer;
+}
+
+.mce-modal-close:hover {
+  background: #243044;
+  color: #e7ecf3;
+}

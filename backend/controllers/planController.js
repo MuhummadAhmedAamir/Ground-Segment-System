@@ -1,4 +1,21 @@
+const pool = require('../db/pool');
 const { createManeuverPlan } = require('../services/planService');
+
+async function listPendingPlansForSatellite(req, res) {
+  try {
+    const { sat_id } = req.params;
+    const { rows } = await pool.query(
+      `SELECT plan_id, sat_id, target_orbit, thrust_val, approval_status, execution_time
+       FROM maneuver_plans
+       WHERE sat_id = $1 AND UPPER(TRIM(approval_status)) = 'PENDING'
+       ORDER BY plan_id`,
+      [sat_id]
+    );
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+}
 
 async function createPlan(req, res) {
   try {
@@ -27,4 +44,4 @@ async function createPlan(req, res) {
   }
 }
 
-module.exports = { createPlan };
+module.exports = { createPlan, listPendingPlansForSatellite };

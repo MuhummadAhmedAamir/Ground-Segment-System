@@ -1,5 +1,31 @@
 const pool = require('../db/pool');
 
+async function listMissions(req, res) {
+  try {
+    const { rows } = await pool.query(
+      `
+      SELECT
+        m.mission_id,
+        m.mcc_id,
+        m.mission_name,
+        m.mission_goal,
+        m.start_date,
+        COUNT(s.sat_id)::int AS satellite_count,
+        COUNT(s.sat_id) FILTER (
+          WHERE UPPER(TRIM(COALESCE(s.status, ''))) LIKE '%ACTIVE%'
+        )::int AS active_satellite_count
+      FROM missions m
+      LEFT JOIN satellites s ON s.mission_id = m.mission_id
+      GROUP BY m.mission_id
+      ORDER BY m.mission_id
+      `
+    );
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+}
+
 async function createMission(req, res) {
   try {
     const { mcc_id, mission_name, mission_goal, start_date } = req.body;
@@ -84,6 +110,7 @@ async function addSatelliteToMission(req, res) {
 }
 
 module.exports = {
+  listMissions,
   createMission,
-  addSatelliteToMission
+  addSatelliteToMission,
 };

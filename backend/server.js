@@ -10,6 +10,7 @@ const planRoute = require('./routes/planRoute');
 const debrisRoute = require('./routes/debrisRoute');
 const windowRoutes = require('./routes/windowRoutes');
 const groundRoutes = require('./routes/groundRoutes');
+const gcRequestRoutes = require('./routes/gcRequestRoutes');
 
 const app = express();
 app.use(express.json());
@@ -22,6 +23,7 @@ app.use('/plan', planRoute);
 app.use('/debris', debrisRoute);
 app.use('/window', windowRoutes);
 app.use('/ground', groundRoutes);
+app.use('/gc-requests', gcRequestRoutes);
 
 app.get('/', (req, res) => {
   res.send('Backend running');

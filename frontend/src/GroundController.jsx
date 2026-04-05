@@ -1,25 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { authJsonHeaders, parseJsonResponse } from './api.js';
 
-const MOCK_MCE_REQUESTS = [
-  {
-    id: 'mce-1',
-    label: 'Scheduled pass — Orion-Alpha',
-    state_id: 1,
-    dish_id: 1,
-    gs_id: 1,
-    status: 'pending',
-  },
-  {
-    id: 'mce-2',
-    label: 'Telemetry window — Star-01',
-    state_id: 2,
-    dish_id: 2,
-    gs_id: 2,
-    status: 'pending',
-  },
-];
-
 export default function GroundController({ onLogout }) {
   const [satellites, setSatellites] = useState([]);
   const [dishes, setDishes] = useState([]);
@@ -31,7 +12,7 @@ export default function GroundController({ onLogout }) {
   const [transmissionOn, setTransmissionOn] = useState(false);
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState('');
-  const [mceRequests, setMceRequests] = useState(MOCK_MCE_REQUESTS);
+  const [mceRequests, setMceRequests] = useState([]);
 
   const selectedDish = dishes.find((d) => String(d.dish_id) === String(dishId));
   const gsId = selectedDish?.gs_id;
@@ -40,6 +21,16 @@ export default function GroundController({ onLogout }) {
     const res = await fetch('/satellite/', { headers: authJsonHeaders() });
     const data = await parseJsonResponse(res);
     setSatellites(Array.isArray(data) ? data : []);
+  }, []);
+
+  const loadGcRequests = useCallback(async () => {
+    try {
+      const res = await fetch('/gc-requests/', { headers: authJsonHeaders() });
+      const data = await parseJsonResponse(res);
+      setMceRequests(Array.isArray(data) ? data : []);
+    } catch {
+      setMceRequests([]);
+    }
   }, []);
 
   const loadDishes = useCallback(async () => {
@@ -53,7 +44,13 @@ export default function GroundController({ onLogout }) {
   useEffect(() => {
     loadSatellites();
     loadDishes();
-  }, [loadSatellites, loadDishes]);
+    loadGcRequests();
+  }, [loadSatellites, loadDishes, loadGcRequests]);
+
+  useEffect(() => {
+    const t = setInterval(loadGcRequests, 5000);
+    return () => clearInterval(t);
+  }, [loadGcRequests]);
 
   const runCheck = useCallback(async () => {
     if (!selectedSat || !dishId || gsId == null) {
@@ -186,8 +183,19 @@ export default function GroundController({ onLogout }) {
     setMsg('');
   }
 
-  function setRequestStatus(id, status) {
-    setMceRequests((prev) => prev.map((r) => (r.id === id ? { ...r, status } : r)));
+  async function setRequestStatus(id, status) {
+    setMsg('');
+    try {
+      const res = await fetch(`/gc-requests/${id}`, {
+        method: 'PATCH',
+        headers: authJsonHeaders(),
+        body: JSON.stringify({ status }),
+      });
+      await parseJsonResponse(res);
+      await loadGcRequests();
+    } catch (e) {
+      setMsg(e.message || 'Could not update request');
+    }
   }
 
   return (

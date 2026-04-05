@@ -3,7 +3,7 @@ const { executeManeuver } = require('../services/maneuverService');
 async function runManeuver(req, res) {
   try {
     const planId = req.params.plan_id;
-    const engineerId = req.user.id;
+    const engineerId = req.user.user_id;
     const result = await executeManeuver(planId, engineerId);
 
     res.json({

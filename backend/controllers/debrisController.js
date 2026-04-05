@@ -6,8 +6,9 @@ async function checkDebris(req, res) {
     const result = await runObservations(satId);
 
     res.json({
-      message: "Debris observation executed",
-      result
+      message: 'Debris observation executed',
+      observations: result.observations,
+      warnings: result.warnings,
     });
   } catch (err) {
     res.status(500).json({ error: err.message });

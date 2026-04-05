@@ -56,12 +56,12 @@ async function executeManeuver(planId, engineerId) {
       newVelocity = state.velocity_kms - velocityChange;
     }
     
-    let newAltitude = targetOrbit === 2 ? 600: 300;
+    const newAltitude = targetOrbit === 2 ? 600 : 300;
     await client.query(
       `UPDATE satellite_state
-      SET orbit_id = $1, velocity_kms = $2, fuel_level = fuel_level - $3, altitude_km = $5, last_updated = NOW()
-      WHERE sat_id = $5`,
-      [targetOrbit, newVelocity, fuelUsed, ,plan.sat_id, newAltitude]
+       SET orbit_id = $1, velocity_kms = $2, fuel_level = fuel_level - $3, altitude_km = $4, last_updated = NOW()
+       WHERE sat_id = $5`,
+      [targetOrbit, newVelocity, fuelUsed, newAltitude, plan.sat_id]
     );
 
     await client.query(
@@ -69,12 +69,6 @@ async function executeManeuver(planId, engineerId) {
        SET approval_status = 'COMPLETED', execution_time = NOW()
        WHERE plan_id = $1`,
       [planId]
-    );
-
-    await client.query(
-      `INSERT INTO command_history (sat_id, execution_time)
-       VALUES ($1, NOW())`,
-      [plan.sat_id]
     );
 
     await client.query(

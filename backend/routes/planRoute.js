@@ -3,10 +3,14 @@ const router = express.Router();
 
 const { authenticate } = require('../middleware/auth');
 const { requireRole } = require('../middleware/rbac');
-const { createPlan } = require('../controllers/planController');
-const { approvePlan } = require('../controllers/planController'); // to be implemented
+const { createPlan, listPendingPlansForSatellite } = require('../controllers/planController');
 
+router.get(
+  '/pending/satellite/:sat_id',
+  authenticate,
+  requireRole('MISSION_ENGINEER'),
+  listPendingPlansForSatellite
+);
 router.post('/', authenticate, requireRole('MISSION_ENGINEER'), createPlan);
-// router.patch('/:plan_id/approve', authenticate, requireRole('GSO'), approvePlan);
 
 module.exports = router;

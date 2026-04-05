@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import Login from './Login.jsx';
 import GroundController from './GroundController.jsx';
+import MissionEngineerDashboard from './MissionEngineerDashboard.jsx';
 import { decodeJwtPayload } from './jwt.js';
 
 function logoutStorage() {
@@ -33,6 +34,10 @@ export default function App() {
 
   if (session.role === 'GROUND_STATION_OPERATOR') {
     return <GroundController onLogout={handleLogout} />;
+  }
+
+  if (session.role === 'MISSION_ENGINEER') {
+    return <MissionEngineerDashboard onLogout={handleLogout} />;
   }
 
   return (
