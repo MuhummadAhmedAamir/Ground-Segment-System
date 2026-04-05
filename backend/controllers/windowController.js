@@ -55,8 +55,7 @@ async function communicationWindowOpen(req,res){
                 throw new Error("Ground Station and Satellite are out of phase");
             }
         }
-        console.log(window.theta)
-        console.log(satellite.theta_deg)
+
         if (!(((Math.abs(window.theta - satellite.theta_deg)) % 90) == 0)){
             throw new Error("Satellite is out of range");
         }
