@@ -1,9 +1,9 @@
 # Ground Segment System (Simulation)
-
+# REMOVE THESE 3 LINES BEFORE FINAL SUBMISSION
+* Attach UI screenshots, edit setup and installation section if there is something missing and go through the Feature Walkthrough section and add the feature you  implemented in your side. Lastly mention if there is some Limitation that is in your mind and it needs to be mentioned. 
 ## Group 3
 
 ### Team Members
-
 * **Muhammad Ahmed Aamir**
 * **Abdul Rafay**
 
@@ -11,174 +11,261 @@
 
 # Project Overview
 
-This project simulates **ground segment** work for satellite mission control: managing missions and satellites, running debris checks, planning maneuvers, and coordinating passes with ground stations (dishes, communication windows, transmissions).
+The **Ground Segment System (Simulation)** is a database-driven system designed to simulate the **ground segment operations of a satellite mission control infrastructure**.
 
-Main areas covered:
+The system models how mission control centers manage satellites, perform orbital maneuvers, monitor space debris, analyze telemetry data, and coordinate communication between satellites and ground stations.
 
-* Mission and satellite lifecycle
-* Satellite state / status
-* Debris observation (same-orbit comparisons, warnings)
-* Maneuver plans and execution
-* Ground communication (dish angle, window open, start/end transmission)
-* Telemetry (schema / logging as in the database)
+### Key Modules
+* **Mission Management:** Lifecycle of satellite deployments.
+* **Satellite State Monitoring:** Real-time health and position tracking.
+* **Debris Observation:** Risk assessment and collision avoidance.
+* **Orbital Maneuver Planning:** Fuel-constrained trajectory changes.
+* **Communication Control:** Ground station dish alignment and data links.
+* **Telemetry Logging:** High-frequency data ingestion and analysis.
 
-Course themes we tried to show: **transactions**, **indexes**, **RBAC**, and **relational modeling**.
+The goal is to simulate **real-world workflows** while demonstrating core database concepts:
+* **Transactions & ACID Properties**
+* **Indexing & Performance Tuning**
+* **Role-Based Access Control (RBAC)**
+* **Relational Schema Design**
 
 ---
 
 # Tech Stack
 
-| Part | Stack |
+| Component | Technology |
 | :--- | :--- |
-| Backend | Node.js, Express |
-| Frontend | React (Vite) |
-| Database | PostgreSQL |
-| Auth | JWT |
-| Passwords | bcrypt |
-
-We connect to Postgres with `pg` using `DATABASE_URL`. Supabase is optional depending on how you host the DB.
+| **Backend** | Node.js, Express.js |
+| **Frontend** | React |
+| **Database** | PostgreSQL |
+| **Auth** | JWT (JSON Web Tokens) |
+| **Security** | bcrypt (Password Hashing) |
+| **API Docs** | OpenAPI (Swagger) |
+| **Hosting** | Supabase |
 
 ---
 
-# Architecture
+# System Architecture
 
-Roughly three layers:
+The system follows a **three-tier architecture**.
 
 ```
-React (dev: port 5173)
-        → REST + JWT
-Express API (port 3000)
-        → SQL via pg pool
-PostgreSQL
+Frontend (React)
+│
+│  REST API (JWT Auth)
+▼
+Backend (Node.js + Express)
+│
+│  SQL Queries / Transactions
+▼
+PostgreSQL Database
 ```
 
-Login hits the API; the server checks the password hash and returns a JWT. Protected routes read `Authorization: Bearer …` and enforce roles.
+## Interaction Flow
+1. A user logs in through the React frontend.
+2. The backend validates credentials using **bcrypt**.
+3. A **JWT token** is issued for session management.
+4. Backend verifies roles and permissions for every request.
+5. Database queries are executed using the **pg connection pool**.
 
 ---
 
-# UI (screenshots TBD)
+# UI Examples
 
-**Login** — username/password; token kept client-side for API calls.
+## Login Page
 
-**Mission engineer** — missions list, satellites list (active/inactive), create mission/satellite, debris table for a selected satellite, maneuver (create plan + execute), form to send requests to ground control.
+**Description:** Users authenticate using their credentials. Successful login returns a JWT token.
 
-**Ground controller** — satellite list, dish select, +/− angle, window check, OPEN indicator, start/end transmission, inbox for MCE requests (load / failed / successful).
+**Reason:** Ensures secure access to sensitive mission control operations.
+
+## Mission Control Dashboard
+
+**Description:** Displays active missions, assigned satellites, and operational states.
+
+**Reason:** Centralized view for mission deployment and oversight.
+
+## Dish Communication Interface
+
+**Description:** Allows ground controllers to open windows, adjust dish angles, and manage transmissions.
+
+**Reason:** Essential for simulating ground-to-space communication links.
 
 ---
 
-# Setup
+# Setup & Installation
 
-**Needs:** Node 18+, PostgreSQL 14+, npm.
+### Prerequisites
 
-**Env:** `backend/.env`:
+| Software | Version |
+| :--- | :--- |
+| Node.js | 18+ |
+| PostgreSQL | 14+ |
+| npm | latest |
+
+### Environment Variables
+
+Create a `.env` file in the root directory:
 
 ```env
+SUPABASE_URL=your_url
+SUPABASE_ANON_KEY=your_key
 DATABASE_URL=postgresql://user:password@host:5432/dbname
 JWT_SECRET=your_secret_key
 ```
 
-**DB:** From the repo root (adjust paths if needed):
+### Database Initialization
+
+Run the schema and seed scripts:
 
 ```bash
-psql "$DATABASE_URL" -f database/schema.sql
-psql "$DATABASE_URL" -f database/seed.sql
+psql $DATABASE_URL -f schema.sql
+psql $DATABASE_URL -f seed.sql
 ```
 
-**Run**
+### Running the System
 
-```bash
-cd backend && npm install && node server.js
-```
-
-```bash
-cd frontend && npm install && npm run dev
-```
-
-Backend: http://localhost:3000 — Frontend: http://localhost:5173 (Vite proxies API paths in dev).
+* **Start Backend:** `node server.js` — Runs on port 3000
+* **Start Frontend:** `cd frontend && npm install && npm run dev` — Runs on port 5173
 
 ---
 
-# Roles
+# User Roles (RBAC)
 
-| Value in `users.role` | What it’s for |
+| Role | Permissions |
 | :--- | :--- |
-| `MISSION_ENGINEER` | Missions, satellites, debris, plans, maneuvers, MCE→GC requests |
-| `GROUND_STATION_OPERATOR` | Pass / comms UI, dishes, GC request queue |
-| `DATA_ANALYST` | Placeholder for analyst features |
+| `MISSION_CONTROLLER` | Creates missions and deploys satellites |
+| `GROUND_CONTROLLER` | Controls communication windows and dish transmissions |
+| `SPACE_ANALYST` | Observes debris and satellite telemetry |
 
-**Test logins** (roles in the DB must match the strings above):
+### Test Credentials
 
-| | Username | Password |
+| Role | Username | Password |
 | :--- | :--- | :--- |
-| Ground | Abdul Rafay | bscs24003 |
-| Mission engineer | Ahmed | bscs24070 |
-| Analyst | Aamir | bscs24000 |
+| Ground Controller | Abdul Rafay | bscs24003 |
+| Mission Controller | Ahmed | bscs24070 |
+| Space Analyst | Aamir | bscs24000 |
 
 ---
 
-# Features (main endpoints)
+# Feature Walkthrough
 
-**Auth:** `POST /auth/login` — `{ username, password }` → `{ token }`.
+### User Authentication
+* **Endpoint:** `POST /login`
+* Users authenticate and receive a JWT token for secure session management.
 
-**Missions:** `GET /missions`, `POST /missions`, `POST /missions/:mission_id/satellites`.
+### Mission Management
+* **Create Mission:** `POST /missions` — Allows mission controllers to initialize new space missions.
+* **Satellite Deployment:** `POST /missions/{mission_id}/satellites` — Adds a satellite to an existing mission.
 
-**Satellites:** `GET /satellite/:sat_id/status`, `GET /satellite/engineer/all` (engineer UI), `GET /satellite/` (ground UI).
+### Monitoring & Observation
+* **Satellite Status:** `GET /satellites/{sat_id}/status` — Returns telemetry including fuel level, altitude, and orbital position.
+* **Debris Observation:** `POST /debris/check/{sat_id}` — Simulates debris detection near a specific satellite.
 
-**Debris:** `POST /debris/check/:sat_id` (engineer, JWT) — returns observation rows + warnings.
-
-**Maneuvers:** `POST /plan` (create), `GET /plan/pending/satellite/:sat_id`, `POST /maneuver/:plan_id/execute`.
-
-**Comms:** `POST /window/check`, `POST /window`, `POST /window/dish`, `POST /window/begin`, `POST /window/end`, `GET /ground/dishes`.
-
-**MCE → GC:** `GET /gc-requests`, `POST /gc-requests`, `PATCH /gc-requests/:id` with `{ status: "failed" | "successful" }`.  
-Note: requests are stored **in memory** for now; they disappear if you restart the server.
-
----
-
-# Transactions (ACID)
-
-Maneuvers and several ground-segment operations run inside DB transactions (`BEGIN` / `COMMIT` / `ROLLBACK`). If something fails (e.g. fuel check on a maneuver), changes are rolled back instead of leaving half-updated state.
+### Maneuver Operations
+* **Plan Creation:** `POST /plans` — Define orbital maneuver parameters.
+* **Execution:** `POST /plans/{plan_id}/execute` — Updates satellite state based on the plan.
 
 ---
 
-# Indexes
+# Transaction Scenarios (ACID Compliance)
 
-We added indexes for heavier queries (telemetry `val`, debris by orbit/risk, satellite state, access_time, etc.). Details and before/after timings are in the SQL / performance write-up for the course.
+### Orbital Maneuver Execution
 
----
+**Trigger:** `POST /plans/{plan_id}/execute`
 
-# API cheat sheet
+**Atomic Operations:**
+1. Check satellite fuel level.
+2. Update satellite orbit coordinates.
+3. Calculate and update fuel consumption.
+4. Record transaction log.
 
-| Method | Path | Notes |
-| :--- | :--- | :--- |
-| POST | `/auth/login` | Public |
-| GET | `/missions` | Engineer |
-| POST | `/missions` | Engineer |
-| POST | `/missions/:id/satellites` | Engineer |
-| GET | `/satellite/:sat_id/status` | Engineer |
-| GET | `/satellite/engineer/all` | Engineer |
-| GET | `/satellite/` | Ground |
-| POST | `/debris/check/:sat_id` | Engineer |
-| POST | `/plan` | Engineer |
-| GET | `/plan/pending/satellite/:sat_id` | Engineer |
-| POST | `/maneuver/:plan_id/execute` | Engineer |
-| POST | `/window/check` | Engineer or ground |
-| POST | `/window` | Same |
-| POST | `/window/dish` | Same |
-| POST | `/window/begin` | Same |
-| POST | `/window/end` | Same |
-| GET | `/ground/dishes` | Ground |
-| GET | `/gc-requests` | Engineer + ground |
-| POST | `/gc-requests` | Engineer |
-| PATCH | `/gc-requests/:id` | Ground |
+**Rollback Condition:** Insufficient fuel. If the check fails, the orbit and fuel remain unchanged.
 
-More detail may also be in `swagger.yaml` if the group keeps it updated.
+### Communication Window Establishment
+
+**Trigger:** `POST /`
+
+**Operations:**
+1. Validate satellite position.
+2. Validate dish reachability/angle.
+3. Check access schedule availability.
+4. Open communication window.
+
+**Rollback Condition:** Invalid satellite position or dish unavailability.
 
 ---
 
-# Limitations
+# ACID Compliance Details
 
-* Orbits and physics are simplified, not production-grade.
-* Fuel / maneuver math is a rough model for the simulation.
-* GC request queue is in-memory only until someone backs it with a real table.
-* Extra design notes: see `Backend_Explanation.pdf` if included in the submission.
+| Property | Implementation |
+| :--- | :--- |
+| **Atomicity** | Transactions used during maneuver execution ensure all-or-nothing completion. |
+| **Consistency** | Foreign keys and constraints enforce relational integrity across tables. |
+| **Isolation** | PostgreSQL default transaction isolation prevents interference between concurrent ops. |
+| **Durability** | Committed data is stored in PostgreSQL. |
+
+---
+
+# Indexing & Performance Optimization
+
+Several indexes were created to optimize query performance.
+
+### Telemetry Query Optimization
+
+**Query:** `SELECT * FROM telemetry_logs WHERE val > 20`
+
+| State | Time |
+| :--- | :--- |
+| Before Index | 2.936 ms |
+| After Index | 0.284 ms |
+
+**Index:** `idx_telemetry_val`
+
+### Debris Risk Query
+
+**Query:** `SELECT * FROM space_debris_catalog WHERE orbit_id = 101 AND danger_radius_km > 5`
+
+| State | Time |
+| :--- | :--- |
+| Before Index | 0.505 ms |
+| After Index | 0.264 ms |
+
+**Index:** `idx_debris_spatial_risk`
+
+### Satellite Communication Join
+
+**Query:** Join across `dish`, `access_time`, and `satellite_state`
+
+| State | Time |
+| :--- | :--- |
+| Before Index | 2.585 ms |
+| After Index | 0.194 ms |
+
+**Indexes:** `idx_access_time_gs`, `idx_access_time_sat`, `idx_satellite_state`
+
+---
+
+#  API Reference Summary
+
+> Full documentation is available in `swagger.yaml`.
+
+| Method | Endpoint | Auth | Description |
+| :--- | :--- | :--- | :--- |
+| `POST` | `/login` | No | User authentication |
+| `POST` | `/missions` | Yes | Create mission |
+| `POST` | `/missions/{id}/satellites` | Yes | Add satellite |
+| `POST` | `/debris/check/{sat_id}` | Yes | Debris observation |
+| `POST` | `/plans` | Yes | Create maneuver plan |
+| `POST` | `/plans/{id}/execute` | Yes | Execute maneuver |
+| `GET` | `/satellites/{id}/status` | Yes | Satellite status |
+| `POST` | `/` | Yes | Open communication window |
+| `POST` | `/dish` | Yes | Adjust dish angle |
+| `POST` | `/begin` | Yes | Begin transmission |
+| `POST` | `/end` | Yes | End transmission |
+
+---
+
+# Known Issues & Limitations
+> Full documentation is available in `Backend_Explanation.pdf`
+* **Physics:** Simulates satellite physics and does not model high-fidelity orbital mechanics.
+* **Calculations:** Maneuver fuel calculations are based on simplified linear models.
