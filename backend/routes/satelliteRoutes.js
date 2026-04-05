@@ -3,8 +3,9 @@ const router = express.Router();
 
 const { authenticate } = require('../middleware/auth');
 const { requireRole } = require('../middleware/rbac');
-const { getSatelliteById } = require('../controllers/satelliteController');
+const { getAllSatellites, getSatelliteById } = require('../controllers/satelliteController');
 
-router.get('/:sat_id/status', authenticate, requireRole('MISSION_ENGINEER'),getSatelliteById);
+router.get('/', authenticate, requireRole('GROUND_STATION_OPERATOR'), getAllSatellites);
+router.get('/:sat_id/status', authenticate, requireRole('MISSION_ENGINEER'), getSatelliteById);
 
 module.exports = router;

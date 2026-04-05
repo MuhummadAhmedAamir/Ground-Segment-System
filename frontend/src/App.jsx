@@ -1,6 +1,12 @@
 import { useState, useEffect } from 'react';
 import Login from './Login.jsx';
+import GroundController from './GroundController.jsx';
 import { decodeJwtPayload } from './jwt.js';
+
+function logoutStorage() {
+  localStorage.removeItem('token');
+  localStorage.removeItem('role');
+}
 
 export default function App() {
   const [session, setSession] = useState(null);
@@ -10,15 +16,23 @@ export default function App() {
     if (!token) return;
     const payload = decodeJwtPayload(token);
     if (payload?.exp && payload.exp * 1000 < Date.now()) {
-      localStorage.removeItem('token');
-      localStorage.removeItem('role');
+      logoutStorage();
       return;
     }
     setSession({ token, role: payload?.role ?? localStorage.getItem('role') });
   }, []);
 
+  function handleLogout() {
+    logoutStorage();
+    setSession(null);
+  }
+
   if (!session) {
     return <Login onLoggedIn={setSession} />;
+  }
+
+  if (session.role === 'GROUND_STATION_OPERATOR') {
+    return <GroundController onLogout={handleLogout} />;
   }
 
   return (
@@ -26,16 +40,8 @@ export default function App() {
       <p>
         Logged in as <strong>{session.role ?? 'unknown role'}</strong>.
       </p>
-      <p className="muted">Replace this block with role-specific dashboards next.</p>
-      <button
-        type="button"
-        className="logout-button"
-        onClick={() => {
-          localStorage.removeItem('token');
-          localStorage.removeItem('role');
-          setSession(null);
-        }}
-      >
+      <p className="muted">Dashboard for this role is not built yet.</p>
+      <button type="button" className="logout-button" onClick={handleLogout}>
         Log out
       </button>
     </div>

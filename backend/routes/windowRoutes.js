@@ -2,13 +2,16 @@ const express = require('express');
 const router = express.Router();
 
 const { authenticate } = require('../middleware/auth');
-const { requireRole } = require('../middleware/rbac');
-const { communicationWindowOpen } = require('../controllers/windowController');
+const { requireAnyRole } = require('../middleware/rbac');
+const { communicationWindowOpen, checkCommunicationWindow } = require('../controllers/windowController');
 const { dishAngle, BeginDishTransmission, EndDishTransmission } = require('../controllers/dishController');
 
-router.post('/', authenticate, requireRole('MISSION_ENGINEER'), communicationWindowOpen);
-router.post('/dish', authenticate, requireRole('MISSION_ENGINEER'), dishAngle);
-router.post('/begin', authenticate, requireRole('MISSION_ENGINEER'), BeginDishTransmission);
-router.post('/end', authenticate, requireRole('MISSION_ENGINEER'), EndDishTransmission);
+const engineerOrGC = requireAnyRole(['MISSION_ENGINEER', 'GROUND_STATION_OPERATOR']);
 
-module.exports = router; 
+router.post('/check', authenticate, engineerOrGC, checkCommunicationWindow);
+router.post('/', authenticate, engineerOrGC, communicationWindowOpen);
+router.post('/dish', authenticate, engineerOrGC, dishAngle);
+router.post('/begin', authenticate, engineerOrGC, BeginDishTransmission);
+router.post('/end', authenticate, engineerOrGC, EndDishTransmission);
+
+module.exports = router;
