@@ -1,0 +1,512 @@
+openapi: 3.0.0
+
+info:
+  title: Space Mission & Satellite Communication Control API
+  version: 1.0.0
+  description: Combined API for managing space missions, satellite deployments, orbital maneuvers, and satellite dish communications
+  contact:
+    name: API Support
+  license:
+    name: Proprietary
+
+servers:
+  - url: http://localhost:3000
+    description: Development server - System API
+  - url: http://localhost:3000/api
+    description: Development server - Communication API
+  - url: https://api.example.com/v1
+    description: Production server
+
+tags:
+  - name: Authentication
+    description: User authentication operations
+  - name: Missions
+    description: Space mission management operations
+  - name: Satellites
+    description: Satellite status and information operations
+  - name: Debris
+    description: Debris observation operations
+  - name: Plans
+    description: Maneuver planning and execution operations
+  - name: Communication Window
+    description: Operations related to communication window management
+  - name: Dish Control
+    description: Operations for dish angle and transmission control
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token authentication required for most endpoints
+
+  schemas:
+    Satellite:
+      type: object
+      required: [model_name, status, orbit_id, fuel_level, velocity]
+      properties:
+        model_name: 
+          type: string
+          description: Model name of the satellite
+        status: 
+          type: string
+          description: Current operational status
+        orbit_id: 
+          type: integer
+          description: ID of the orbit
+        fuel_level: 
+          type: number
+          minimum: 0
+          description: Current fuel level
+        velocity: 
+          type: number
+          description: Current velocity
+
+    Error:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          description: Error message
+          example: "Resource not found"
+
+    CommunicationWindowRequest:
+      type: object
+      required:
+        - dish_id
+        - state_id
+        - gs_id
+      properties:
+        dish_id:
+          type: integer
+          description: ID of the dish
+          example: 101
+        state_id:
+          type: integer
+          description: ID of the satellite state
+          example: 202
+        gs_id:
+          type: integer
+          description: ID of the ground station
+          example: 303
+
+    CommunicationWindowResponse:
+      type: object
+      properties:
+        open:
+          type: boolean
+          description: Indicates if communication window is open
+          example: true
+        direction:
+          type: integer
+          description: Direction sign for dish adjustment (-1, 0, 1)
+          enum: [-1, 0, 1]
+          example: 1
+
+    DishAngleRequest:
+      type: object
+      required:
+        - dish_id
+        - state_id
+        - sign
+      properties:
+        dish_id:
+          type: integer
+          description: ID of the dish to adjust
+          example: 101
+        state_id:
+          type: integer
+          description: ID of the current satellite state
+          example: 202
+        sign:
+          type: integer
+          description: Direction sign for angle adjustment (-1 for increase, 1 for decrease)
+          enum: [-1, 1]
+          example: -1
+
+    DishAngleResponse:
+      type: object
+      properties:
+        success:
+          type: string
+          description: Operation success status
+          enum: ['True']
+          example: 'True'
+
+    TransmissionRequest:
+      type: object
+      required:
+        - access_id
+      properties:
+        access_id:
+          type: integer
+          description: ID of the access record
+          example: 404
+
+    TransmissionResponse:
+      type: object
+      properties:
+        transmission:
+          type: string
+          description: Transmission status
+          enum: ['BEGUN', 'COMPLETION']
+          example: 'BEGUN'
+
+  responses:
+    BadRequest:
+      description: Missing required fields or invalid request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: "Missing required fields"
+    
+    Unauthorized:
+      description: Authentication failed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: "Authentication required"
+    
+    Forbidden:
+      description: Insufficient permissions
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: "Insufficient permissions"
+    
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: "Resource not found"
+    
+    InternalServerError:
+      description: Server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: "Internal server error"
+
+security:
+  - bearerAuth: []
+
+paths:
+  # Authentication
+  /login:
+    post:
+      summary: User login
+      tags: [Authentication]
+      security: [] 
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [username, password]
+              properties:
+                username: { type: string }
+                password: { type: string }
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token: { type: string }
+        "401":
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  # Mission Management
+  /missions:
+    post:
+      summary: Create mission
+      tags: [Missions]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [mcc_id, mission_name, mission_goal, start_date]
+              properties:
+                mcc_id: { type: integer }
+                mission_name: { type: string }
+                mission_goal: { type: string }
+                start_date: { type: string, format: date }
+      responses:
+        "201":
+          description: Mission created
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+
+  /missions/{mission_id}/satellites:
+    post:
+      summary: Add satellite to mission
+      tags: [Missions]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: mission_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Satellite'
+      responses:
+        "201":
+          description: Satellite added
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "403":
+          $ref: '#/components/responses/Forbidden'
+
+  # Debris Operations
+  /debris/check/{sat_id}:
+    post:
+      summary: Execute debris observation
+      tags: [Debris]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: sat_id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Observation executed
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+
+  # Maneuver Plans
+  /plans:
+    post:
+      summary: Create maneuver plan
+      tags: [Plans]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [sat_id, target_orbit, thrust_value]
+              properties:
+                sat_id: { type: integer }
+                target_orbit: { type: integer }
+                thrust_value: { type: number }
+      responses:
+        "200":
+          description: Maneuver plan created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  plan_id: { type: integer }
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+
+  /plans/{plan_id}/execute:
+    post:
+      summary: Execute maneuver plan
+      tags: [Plans]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: plan_id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Maneuver executed
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+
+  # Satellite Status
+  /satellites/{sat_id}/status:
+    get:
+      summary: Get satellite status by ID
+      tags: [Satellites]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: sat_id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Satellite status retrieved
+          content:
+            application/json:
+              schema:
+                type: object 
+                properties:
+                  sat_id: { type: integer }
+                  model_name: { type: string }
+                  fuel_level: { type: number }
+                  theta_deg: { type: number }
+                  altitude_km: { type: number }
+                  last_updated: { type: string, format: date-time }
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "404":
+          $ref: '#/components/responses/NotFound'
+
+  # Communication Window
+  /:
+    post:
+      tags:
+        - Communication Window
+      summary: Open a communication window
+      description: Validates and opens a communication window between a dish and satellite state
+      operationId: openCommunicationWindow
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommunicationWindowRequest'
+      responses:
+        '200':
+          description: Communication window status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommunicationWindowResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # Dish Control
+  /dish:
+    post:
+      tags:
+        - Dish Control
+      summary: Adjust dish angle
+      description: Adjusts the elevation angle of a dish based on satellite position and personnel availability
+      operationId: adjustDishAngle
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DishAngleRequest'
+      responses:
+        '200':
+          description: Angle adjustment successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DishAngleResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # Transmission Control
+  /begin:
+    post:
+      tags:
+        - Dish Control
+      summary: Begin dish transmission
+      description: Marks the start of a dish transmission session
+      operationId: beginTransmission
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransmissionRequest'
+      responses:
+        '200':
+          description: Transmission started successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransmissionResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /end:
+    post:
+      tags:
+        - Dish Control
+      summary: End dish transmission
+      description: Marks the completion of a dish transmission session
+      operationId: endTransmission
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransmissionRequest'
+      responses:
+        '200':
+          description: Transmission completed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransmissionResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
