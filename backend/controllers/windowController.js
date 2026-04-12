@@ -30,16 +30,16 @@ async function evaluateAlignment(client, dish_id, state_id, gs_id) {
     return { ok: false, error: 'Satellite is unreachable' };
   }
 
-  if (window.theta % 180 === 0) {
-    if (satellite.theta_deg % 180 === 1) {
+  if (window.theta < 180) {
+    if (satellite.theta_deg > 180) {
       return { ok: false, error: 'Ground Station and Satellite are out of phase' };
     }
-  } else if (satellite.theta_deg % 180 === 0) {
+  } else if (satellite.theta_deg < 180) {
     return { ok: false, error: 'Ground Station and Satellite are out of phase' };
   }
 
-  if (!((Math.abs(window.theta - satellite.theta_deg) % 90) === 0)) {
-    return { ok: false, error: 'Satellite is out of range' };
+  if (!(Math.abs(window.theta - satellite.theta_deg) < 90)) {
+    return { ok: false, error: `Satellite is out of range ${window.theta} and ${satellite.theta_deg}` };
   }
 
   const difference = window.theta - satellite.theta_deg;
@@ -115,17 +115,18 @@ async function communicationWindowOpen(req, res) {
       throw new Error('Satellite is unreachable');
     }
 
-    if (window.theta % 180 === 0) {
-      if (satellite.theta_deg % 180 === 1) {
+    if (window.theta < 180) {
+      if (window.theta > 180) {
         throw new Error('Ground Station and Satellite are out of phase');
       }
-    } else if (satellite.theta_deg % 180 === 0) {
+    } else if (satellite.theta_deg < 180) {
       throw new Error('Ground Station and Satellite are out of phase');
     }
 
-    if (!((Math.abs(window.theta - satellite.theta_deg) % 90) === 0)) {
+    if (!(Math.abs(window.theta - satellite.theta_deg) < 90)) {
       throw new Error('Satellite is out of range');
     }
+
 
     const difference = window.theta - satellite.theta_deg;
     let sign;
