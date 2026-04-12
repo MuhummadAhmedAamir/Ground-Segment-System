@@ -100,6 +100,10 @@ PostgreSQL Database
 | PostgreSQL | 14+ |
 | npm | latest |
 
+### Git Clone Repository
+
+Clone the project repository to your local system
+
 ### Environment Variables
 
 Create a `.env` file in the root directory:
@@ -113,12 +117,7 @@ JWT_SECRET=your_secret_key
 
 ### Database Initialization
 
-Run the schema and seed scripts:
-
-```bash
-psql $DATABASE_URL -f schema.sql
-psql $DATABASE_URL -f seed.sql
-```
+Run the schema and seed scripts in supabase:
 
 ### Running the System
 
